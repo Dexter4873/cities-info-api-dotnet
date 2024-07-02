@@ -28,4 +28,21 @@ public class FilesController : ControllerBase
         var bytes = System.IO.File.ReadAllBytes(path);
         return File(bytes, contentType, Path.GetFileName(path));
     }
+
+    [HttpPost]
+    public async Task<ActionResult> CreateFile(IFormFile file)
+    {
+        if (file.Length == 0 || file.ContentType != "application/pdf")
+        {
+            return BadRequest("File is not in the right format");
+        }
+
+        var path = Path.Combine(Directory.GetCurrentDirectory(), $"uploaded_file_{Guid.NewGuid()}.pdf");
+        using (var stream = new FileStream(path, FileMode.Create))
+        {
+            await file.CopyToAsync(stream); 
+        }
+
+        return Ok("File was uploaded");
+    }
 }
